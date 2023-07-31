@@ -17,6 +17,10 @@ public class SectionClipboardInfo implements Serializable {
 	public static final String FILE_NAME_INFO = "SectionClipboardInfo.ser";
 	public static final String FILE_NAME      = "SectionClipboard.ser";
 	public static final String FILE_NAME_ICON = "SectionClipboardIcon.png";
+	public static final String FILE_PREFIX_INFO_HEADER = "SectionInfoHeader_";
+	public static final String FILE_PREFIX_INFO_BLOCK  = "SectionInfoBlock_";
+	public static final String FILE_PREFIX_INFO_FILE   = "SectionInfoFile_";
+	public static final String FILE_POSTFIX            = ".ser";
 	
 	//for typeOper
 	public static final int TYPE_OPER_COPY = 0;

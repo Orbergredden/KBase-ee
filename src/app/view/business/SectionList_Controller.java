@@ -13,9 +13,14 @@ import app.model.Params;
 import app.model.StateItem;
 import app.model.StateList;
 import app.model.business.InfoHeaderItem;
+import app.model.business.Info_FileItem;
+import app.model.business.Info_ImageItem;
+import app.model.business.Info_TextItem;
 import app.model.business.SectionClipboardInfo;
 import app.model.business.SectionItem;
 import app.model.business.template.TemplateClipboardInfo;
+import app.model.business.template.TemplateItem;
+import app.model.business.template.TemplateSimpleItem;
 import app.view.structure.TabNavigationHistory;
 
 import java.io.File;
@@ -597,64 +602,94 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
      */
     @FXML
     private void handleButtonSectionPaste() {
-    	TreeItem<SectionItem> trgItem = treeTableView_sections.getSelectionModel().getSelectedItem();
+    	SectionClipboardInfo clip;
+    	TreeItem<SectionItem> selectedItem = treeTableView_sections.getSelectionModel().getSelectedItem();
+    	SectionItem item;
     	
-    	// проверяем наличие обьекта-раздела в буфере
-    	if (clipBoard_tiSection == null) {
-    		ShowAppMsg.showAlert("INFORMATION", "Вставка раздела", 
-    				"Локальный буфер обмена пустой.", "Ничего не вставлено.");
-    		params.setMsgToStatusBar("Локальный буфер обмена пустой.");
-    		return;
-    	}
-    	if ((clipBoard_typeOperation != CLIPBOARD_TYPE_OPERATION__COPY) && 
-    		(clipBoard_typeOperation != CLIPBOARD_TYPE_OPERATION__CUT)) {
-    		ShowAppMsg.showAlert("INFORMATION", "Вставка раздела", 
-    				"Неизвестная команда в буфере обмена.", "Ничего не вставлено.");
-    		params.setMsgToStatusBar("Неизвестная команда в буфере обмена.");
+    	String path = params.getConfig().getItemValue("directories", "PathDirCache") + "clipboard/";
+    	
+    	//-------- check 
+    	if (selectedItem == null) {
+    		ShowAppMsg.showAlert("WARNING", "Нет выбора", "Не выбран элемент", 
+    				"Выберите элемент.");
     		return;
     	}
     	
-    	// проверяем наличие выбранного обьекта-раздела как приемника
-    	if (trgItem == null) {
-    		ShowAppMsg.showAlert("INFORMATION", "Вставка раздела", 
-    				"Не выбран раздел-приемник.", "Ничего не вставлено.");
-    		params.setMsgToStatusBar("Не выбран раздел-приемник.");
+    	item = selectedItem.getValue();
+    	
+    	//--------- read info object
+    	clip = SectionClipboardInfo.unserialize(path, SectionClipboardInfo.FILE_NAME_INFO);
+    	
+    	// check CUT for different connections
+    	if ((clip.getTypeOper() == TemplateClipboardInfo.TYPE_OPER_CUT) && 
+    		(clip.getDbCon_Id() != params.getConCur().Id)) {
+    		ShowAppMsg.showAlert("WARNING", "Перенос об'екту", 
+    				"Неможливо переносити об'єкт між різними БД, тільки копіювати.", "");
     		return;
     	}
     	
-    	// Copy
-    	if (clipBoard_typeOperation == CLIPBOARD_TYPE_OPERATION__COPY) {
-        	boolean copyWithSubSection = prefs.get("copyWithSubSection", "No").equals("Yes");
-        	int retVal = ShowAppMsg.showQuestionWithOption(
-        			"CONFIRMATION", "Копирование раздела", 
-                      "Копировать раздел '"+ clipBoard_tiSection.getValue().getName() +"' ?", null,
-                      "Копировать ветку целиком", copyWithSubSection);
-        	long newSectionId = 0;
-        	
-        	if (retVal == ShowAppMsg.QUESTION_OK) {          // сохраняем только один раздел
-        		newSectionId = treeViewCtrl.copySection (clipBoard_tiSection.getValue(), trgItem, false);
-        		
-        		// save Option value
-        		prefs.put("copyWithSubSection", "No");
-        		
-        		// выводим сообщение в статус бар
-        		params.setMsgToStatusBar("Раздел '" + clipBoard_tiSection.getValue().getName() + "' скопирован.");
-        	}
-        	if (retVal == ShowAppMsg.QUESTION_OK_WITH_OPTION) {          // сохраняем всю ветку
-        		newSectionId = treeViewCtrl.copySection (clipBoard_tiSection.getValue(), trgItem, true);
-        		
-        		// save Option value
-        		prefs.put("copyWithSubSection", "Yes");
-        		
-        		// выводим сообщение в статус бар
-        		params.setMsgToStatusBar("Раздел (ветка) '" + clipBoard_tiSection.getValue().getName() + "' скопирована.");
-        	}
-        	
-        	treeTableView_sections.sort();
-        	treeViewCtrl.expandTreeItemsById(treeViewCtrl.root, newSectionId);
-        	treeViewCtrl.selectTreeItemById(treeViewCtrl.root, newSectionId);
+    	// read section object
+    	SectionItem sectionItem = 
+    			SectionItem.unserialize(path, SectionClipboardInfo.FILE_NAME, SectionClipboardInfo.FILE_NAME_ICON);
+    	
+    	// copy or cut object
+    	switch (clip.getTypeOper()) {
+    	case SectionClipboardInfo.TYPE_OPER_COPY :
+    		if (clip.getDbCon_Id() != params.getConCur().Id) {  // вставляємо в туж саму БД (взяв старий код)
+    			boolean copyWithSubSection = prefs.get("copyWithSubSection", "No").equals("Yes");
+            	int retVal = ShowAppMsg.showQuestionWithOption(
+            			"CONFIRMATION", "Копирование раздела", 
+                          "Копировать раздел '"+ sectionItem.getName() +"' ?", null,
+                          "Копировать ветку целиком", copyWithSubSection);
+            	long newSectionId = 0;
+            	
+            	if (retVal == ShowAppMsg.QUESTION_OK) {          // сохраняем только один раздел
+            		newSectionId = treeViewCtrl.copySection (sectionItem, selectedItem, false);
+            		
+            		// save Option value
+            		prefs.put("copyWithSubSection", "No");
+            		
+            		// выводим сообщение в статус бар
+            		params.setMsgToStatusBar("Раздел '" + sectionItem.getName() + "' скопирован.");
+            	}
+            	if (retVal == ShowAppMsg.QUESTION_OK_WITH_OPTION) {          // сохраняем всю ветку
+            		newSectionId = treeViewCtrl.copySection (sectionItem, selectedItem, true);
+            		
+            		// save Option value
+            		prefs.put("copyWithSubSection", "Yes");
+            		
+            		// выводим сообщение в статус бар
+            		params.setMsgToStatusBar("Раздел (ветка) '" + sectionItem.getName() + "' скопирована.");
+            	}
+            	
+            	treeTableView_sections.sort();
+            	treeViewCtrl.expandTreeItemsById(treeViewCtrl.root, newSectionId);
+            	treeViewCtrl.selectTreeItemById(treeViewCtrl.root, newSectionId);
+    		} else {      // бази даних різні
+    			
+    			
+    			
+    			
+    		}
+    		
+    		
+    		
+    		
+    		
+    		break;
+    	case SectionClipboardInfo.TYPE_OPER_CUT :
+    		
+    		
+    		
+    		
+    		
+    		break;
     	}
     	
+    	
+    	//TODO
+    	
+    	/*
     	// Move
     	if (clipBoard_typeOperation == CLIPBOARD_TYPE_OPERATION__CUT) {
     		clipBoard_tiSection.getParent().getChildren().remove(clipBoard_tiSection);
@@ -671,6 +706,7 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     		
             clipBoard_tiSection = null;
     	}
+    	*/
     }
     
     /**
@@ -1276,13 +1312,37 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     	
     	// write infoblocks
     	List<InfoHeaderItem> listInfoHeaders = params.getConCur().db.infoListBySectionId(item.getId());
+    	int cnt = 0;
     	
-    	
-    	
-    	
-    	
+    	for (InfoHeaderItem i : listInfoHeaders) {
+			cnt++;
+    		i.serialize(path, 
+    				SectionClipboardInfo.FILE_PREFIX_INFO_HEADER+cnt+SectionClipboardInfo.FILE_POSTFIX);
+    		
+    		switch ((int)i.getInfoTypeId()) {
+    		case 1 :    // Простий текст
+    			Info_TextItem it = params.getConCur().db.info_TextGet(i.getInfoId());
+    			it.serialize(path, 
+        				SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+cnt+SectionClipboardInfo.FILE_POSTFIX);
+    			break;
+    		case 2 :    // Зображення
+    			Info_ImageItem ii = params.getConCur().db.info_ImageGet(i.getInfoId());
+    			ii.serialize(path, 
+        				SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+cnt+SectionClipboardInfo.FILE_POSTFIX,
+        				SectionClipboardInfo.FILE_PREFIX_INFO_FILE +cnt+SectionClipboardInfo.FILE_POSTFIX);
+    			break;
+    		case 3 :    // Файл
+    			Info_FileItem ifl = params.getConCur().db.info_FileGet(i.getInfoId());
+    			ifl.serialize(path, 
+        				SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+cnt+SectionClipboardInfo.FILE_POSTFIX);
+    			break;
+    		default :
+    			ShowAppMsg.showAlert("WARNING", "Copy/Cut to local clipboard", 
+    					"Невідомий тип інфоблока", 
+   		                "Тип інфоблока "+i.getInfoTypeId()+" не визначений");
+    		}
+		}
     }
-    //TODO
 
 	/**
 	 * Класс обработки дерева разделов

@@ -67,7 +67,7 @@ public class Main extends Application {
 		
 		//--------
 		params.setMainStage(mainStage);
-        params.getMainStage().setTitle("KBase solo");
+        params.getMainStage().setTitle("KBase ee");
         params.getMainStage().getIcons().add(new Image("file:resources/images/MainIco.png")); // Устанавливаем иконку приложения
         params.getMainStage().setWidth(prefs.getDouble("primaryStageWidth", 800));
         params.getMainStage().setHeight(prefs.getDouble("primaryStageHeight", 600));
