@@ -45,6 +45,8 @@ public class SectionItem extends SimpleItem implements Serializable {
 	private long themeId_ser;
 	private int cacheType_ser;
 	
+	private boolean isIconPresent_ser;
+	
 	/**
 	 * Конструктор по умолчанию.
 	 */
@@ -172,7 +174,9 @@ public class SectionItem extends SimpleItem implements Serializable {
 	public void serialize (String path, String fileName, String fileNameIcon) {
 		doBeforeSerialization ();
 
-		FileUtil.writeImageFile(path + fileNameIcon, icon);
+		if (isIconPresent_ser) {
+			FileUtil.writeImageFile(path + fileNameIcon, icon);
+		}
 		
 		try (ObjectOutputStream outputStream = 
         		new ObjectOutputStream(new FileOutputStream(path+fileName))) {
@@ -203,11 +207,13 @@ public class SectionItem extends SimpleItem implements Serializable {
     		return null;
         }
 		
-		try {
-			si.icon = FileUtil.readImageFile (path + fileNameIcon);
-		} catch (KBase_ReadTextFileUTFEx e) {
-			//e.printStackTrace();
-			ShowAppMsg.showAlert("WARNING", "Читання файла з диска", e.msg, e.fileName);
+		if (si.isIconPresent_ser) {
+			try {
+				si.icon = FileUtil.readImageFile (path + fileNameIcon);
+			} catch (KBase_ReadTextFileUTFEx e) {
+				//e.printStackTrace();
+				ShowAppMsg.showAlert("WARNING", "Читання файла з диска", e.msg, e.fileName);
+			}
 		}
 		
 		si.doAfterSerialization();
@@ -229,6 +235,9 @@ public class SectionItem extends SimpleItem implements Serializable {
 		iconIdDef_ser = getIconIdDef();
 		themeId_ser = getThemeId();
 		cacheType_ser = getCacheType();
+		
+		if (icon == null)  isIconPresent_ser = false;
+		else               isIconPresent_ser = true;
 	}
 	
 	/**

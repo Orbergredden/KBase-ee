@@ -1722,13 +1722,12 @@ public static int getRowCount(ResultSet set) throws SQLException
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
-            //Logger lgr = Logger.getLogger(Prepared.class.getName());
-            //lgr.log(Level.SEVERE, ex.getMessage(), ex);
         	ex.printStackTrace();
         	ShowAppMsg.showAlert("WARNING", "db error", "Ошибка при работе с базой данных", 
 					             "Ошибка при добавлении нового раздела.");
 		}
 	}
+	//TODO
 
 	/**
 	 * Раздел. Копирование всех инфо блоков с одного раздела в другой.

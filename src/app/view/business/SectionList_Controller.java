@@ -635,7 +635,7 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     	// copy or cut object
     	switch (clip.getTypeOper()) {
     	case SectionClipboardInfo.TYPE_OPER_COPY :
-    		if (clip.getDbCon_Id() != params.getConCur().Id) {  // вставляємо в туж саму БД (взяв старий код)
+    		if (clip.getDbCon_Id() == params.getConCur().Id) {  // вставляємо в туж саму БД (взяв старий код)
     			boolean copyWithSubSection = prefs.get("copyWithSubSection", "No").equals("Yes");
             	int retVal = ShowAppMsg.showQuestionWithOption(
             			"CONFIRMATION", "Копирование раздела", 
@@ -1911,9 +1911,9 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
 			SectionItem curCII = new SectionItem(cpyCII);
 			curCII.setId(params.getConCur().db.sectionNextId());
 			curCII.setParentId(trgTI.getValue().getId());
-			curCII.setDateCreated(new Date());
-			curCII.setDateModified(new Date());
-			curCII.setDateModifiedInfo(new Date());
+			//curCII.setDateCreated(new Date());
+			//curCII.setDateModified(new Date());
+			//curCII.setDateModifiedInfo(new Date());
 
 			// раздел и его инфо блоки добавляем в БД
 			params.getConCur().db.sectionAdd(curCII);
