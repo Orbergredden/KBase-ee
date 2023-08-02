@@ -671,11 +671,6 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     			
     			
     		}
-    		
-    		
-    		
-    		
-    		
     		break;
     	case SectionClipboardInfo.TYPE_OPER_CUT :
     		
@@ -1918,7 +1913,7 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
 			// раздел и его инфо блоки добавляем в БД
 			params.getConCur().db.sectionAdd(curCII);
 			params.getConCur().db.sectionCopyInfoBlocks(cpyCII.getId(), curCII.getId());
-			params.getConCur().db.sectionUpdateDateModifiedInfo(curCII.getId());
+			//params.getConCur().db.sectionUpdateDateModifiedInfo(curCII.getId());
 
 			// добавляем к новому родителю
 			TreeItem<SectionItem> curTI = new TreeItem<>(curCII);

@@ -1702,12 +1702,40 @@ public static int getRowCount(ResultSet set) throws SQLException
 	 * Раздел. Добавление нового.
 	 */
 	public void sectionAdd (SectionItem i) {
+		String stm;
 		PreparedStatement pst = null;
 		
+		int paramCount = 10;
+		String strInto = "";
+		String strValues = "";
+		
 		try {
-            String stm = "INSERT INTO sections (id, parent_id, name, icon_id, descr, " +
-            		     "                      icon_id_root, icon_id_def, theme_id, cache_type) " + 
-            			 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			if (i.getDateCreated() != null) {
+				strInto   += ", date_created";
+				strValues += ", ?";
+			}
+			if (i.getDateModified() != null) {
+				strInto   += ", date_modified";
+				strValues += ", ?";
+			}
+			if (i.getDateModifiedInfo() != null) {
+				strInto   += ", date_modified_info";
+				strValues += ", ?";
+			}
+			if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+				strInto   += ", user_created";
+				strValues += ", ?";
+			}
+			if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				strInto   += ", user_modified";
+				strValues += ", ?";
+			}
+			
+            stm = "INSERT INTO sections (id, parent_id, name, icon_id, descr, " +
+            		     "                      icon_id_root, icon_id_def, theme_id, cache_type" +
+            		                     strInto +") " + 
+            			 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?" +
+            			         strValues + ")";
             pst = con.prepareStatement(stm);
             pst.setLong  (1, i.getId());
             pst.setLong  (2, i.getParentId());
@@ -1719,6 +1747,22 @@ public static int getRowCount(ResultSet set) throws SQLException
             pst.setLong  (8, i.getThemeId());
             pst.setInt   (9, i.getCacheType());
             
+            if (i.getDateCreated() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateCreated().getTime()));
+            }
+            if (i.getDateModified() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModified().getTime()));
+            }
+            if (i.getDateModifiedInfo() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModifiedInfo().getTime()));
+            }
+            if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+            	pst.setString(paramCount++, i.getUserCreated());
+			}
+            if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				pst.setString(paramCount++, i.getUserModified());
+			}
+            
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
@@ -1727,7 +1771,6 @@ public static int getRowCount(ResultSet set) throws SQLException
 					             "Ошибка при добавлении нового раздела.");
 		}
 	}
-	//TODO
 
 	/**
 	 * Раздел. Копирование всех инфо блоков с одного раздела в другой.
@@ -1748,8 +1791,6 @@ public static int getRowCount(ResultSet set) throws SQLException
 			rs.close();
 			pst.close();
 		} catch (SQLException ex) {
-			//Logger lgr = Logger.getLogger(Prepared.class.getName());
-			//lgr.log(Level.SEVERE, ex.getMessage(), ex);
 			ex.printStackTrace();
 			ShowAppMsg.showAlert(
 					"WARNING", "db error",
@@ -1932,7 +1973,6 @@ public static int getRowCount(ResultSet set) throws SQLException
 		
 		return retVal;
 	}
-	//TODO
 	
 	/**
 	 * Возвращает цепочку имен разделов от указанного до самого верхнего родителя. 
