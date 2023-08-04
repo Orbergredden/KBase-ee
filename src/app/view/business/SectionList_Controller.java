@@ -670,38 +670,32 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     			
     			
     			
+    			
+    			
+    			
+    			
+    			
+    			//TODO
     		}
     		break;
     	case SectionClipboardInfo.TYPE_OPER_CUT :
+    		TreeItem<SectionItem> tiSectionFromSer = new TreeItem<SectionItem> (sectionItem); 
     		
+    		selectedItem.getChildren().add(tiSectionFromSer);
+    		treeTableView_sections.sort();
+    		treeTableView_sections.getSelectionModel().select(tiSectionFromSer);
+			//treeViewCtrl.selectTreeItemById(treeTableView_sections.getRoot(), clipBoard_tiSection.getValue().getId());
     		
+    		// update in DB
+    		params.getConCur().db.sectionMove (sectionItem.getId(), item.getId());
     		
+    		// выводим сообщение в статус бар
+    		params.setMsgToStatusBar("Раздел '" + sectionItem.getName() + "' перемещен.");
     		
+            //clipBoard_tiSection = null;    // ??? from old version
     		
     		break;
     	}
-    	
-    	
-    	//TODO
-    	
-    	/*
-    	// Move
-    	if (clipBoard_typeOperation == CLIPBOARD_TYPE_OPERATION__CUT) {
-    		clipBoard_tiSection.getParent().getChildren().remove(clipBoard_tiSection);
-    		trgItem.getChildren().add(clipBoard_tiSection);
-			treeTableView_sections.sort();
-    		//treeTableView_sections.getSelectionModel().select(clipBoard_tiSection);
-			treeViewCtrl.selectTreeItemById(treeTableView_sections.getRoot(), clipBoard_tiSection.getValue().getId());
-
-    		// update in DB
-    		params.getConCur().db.sectionMove (clipBoard_tiSection.getValue().getId(), trgItem.getValue().getId());
-    		
-    		// выводим сообщение в статус бар
-    		params.setMsgToStatusBar("Раздел '" + clipBoard_tiSection.getValue().getName() + "' перемещен.");
-    		
-            clipBoard_tiSection = null;
-    	}
-    	*/
     }
     
     /**
