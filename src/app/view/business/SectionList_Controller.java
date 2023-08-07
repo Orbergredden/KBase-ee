@@ -666,10 +666,42 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
             	treeViewCtrl.expandTreeItemsById(treeViewCtrl.root, newSectionId);
             	treeViewCtrl.selectTreeItemById(treeViewCtrl.root, newSectionId);
     		} else {      // бази даних різні
+    			//---- десеріалізація та підготовка даних, додаємо в БД
+    			sectionItem.setId(params.getConCur().db.sectionNextId());
+    			sectionItem.setParentId(item.getId());
+    			sectionItem.setIconId(0);
+    			sectionItem.setIconIdRoot(0);
+    			sectionItem.setIconIdDef(0);
+    			sectionItem.setThemeId(item.getThemeId());
+    			
+    			params.getConCur().db.sectionAdd(sectionItem);
+    			
+    			//
+    			InfoHeaderItem ihi;
+    			
+    			for (int i=1; i<clip.getNumberOfInfoBlocks(); i++) {
+    				ihi = InfoHeaderItem.unserialize(path, 
+    						SectionClipboardInfo.FILE_PREFIX_INFO_HEADER+i+SectionClipboardInfo.FILE_POSTFIX);
+    				ihi.setId(params.getConCur().db.infoNextId());
+    				ihi.setSectionId(sectionItem.getId());
+    				ihi.setTemplateStyleId(0);
+    				//infoId ...
+    				
+    				
+    				///unser infoblock
+    				
+    				
+    				
+    				/// add to DB (2)
+    				
+    				
+    				
+    				
+    			}
     			
     			
     			
-    			
+    			//---- додаємо в дерево-контрол
     			
     			
     			

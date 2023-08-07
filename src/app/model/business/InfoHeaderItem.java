@@ -9,13 +9,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
 
-import app.exceptions.KBase_ReadTextFileUTFEx;
-import app.lib.FileUtil;
 import app.lib.ShowAppMsg;
 import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 /*
  * Класс содержит информацию об одном заголовке информационного блока документа

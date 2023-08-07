@@ -893,12 +893,36 @@ public static int getRowCount(ResultSet set) throws SQLException
 	 * Заголовок инфоблока. Добавление нового.
 	 */
 	public void infoAdd (InfoHeaderItem i) {
+		String stm;
 		PreparedStatement pst;
 		
+		int paramCount = 9;
+		String strInto = "";
+		String strValues = "";
+		
 		try {
-            String stm = "INSERT INTO info (id, sectionid, infotypeid, infoid, position, template_style_id, " +
-		                 "                            name, descr) " + 
-            			 "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+			if (i.getDateCreated() != null) {
+				strInto   += ", date_created";
+				strValues += ", ?";
+			}
+			if (i.getDateModified() != null) {
+				strInto   += ", date_modified";
+				strValues += ", ?";
+			}
+			if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+				strInto   += ", user_created";
+				strValues += ", ?";
+			}
+			if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				strInto   += ", user_modified";
+				strValues += ", ?";
+			}
+			
+            stm = "INSERT INTO info (id, sectionid, infotypeid, infoid, position, template_style_id, " +
+		                 "           name, descr" +
+		                             strInto +") " +  
+            			 "VALUES(?, ?, ?, ?, ?, ?, ?, ?" +
+            			         strValues + ")";
             pst = con.prepareStatement(stm);
             pst.setLong  (1, i.getId());
             pst.setLong  (2, i.getSectionId());
@@ -909,18 +933,32 @@ public static int getRowCount(ResultSet set) throws SQLException
             pst.setString(7, i.getName());
             pst.setString(8, i.getDescr());
             
+            if (i.getDateCreated() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateCreated().getTime()));
+            }
+            if (i.getDateModified() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModified().getTime()));
+            }
+            if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+            	pst.setString(paramCount++, i.getUserCreated());
+			}
+            if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				pst.setString(paramCount++, i.getUserModified());
+			}
+            
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
-            //Logger lgr = Logger.getLogger(Prepared.class.getName());
-            //lgr.log(Level.SEVERE, ex.getMessage(), ex);
         	ex.printStackTrace();
         	ShowAppMsg.showAlert("WARNING", "db error", "Ошибка при работе с базой данных", 
 					             "Ошибка при добавлении нового заголовка блока (infoAdd).");
 		}
 		
-		sectionUpdateDateModifiedInfo (i.getSectionId());
+		if (i.getDateModified() == null) {
+			sectionUpdateDateModifiedInfo (i.getSectionId());
+        }
 	}
+	//TODO
 	
 	/**
 	 * Подсчет кол-ва инфоблоков для указанного раздела.
