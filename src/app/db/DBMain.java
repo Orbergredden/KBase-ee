@@ -958,7 +958,6 @@ public static int getRowCount(ResultSet set) throws SQLException
 			sectionUpdateDateModifiedInfo (i.getSectionId());
         }
 	}
-	//TODO
 	
 	/**
 	 * Подсчет кол-ва инфоблоков для указанного раздела.
@@ -1307,19 +1306,45 @@ public static int getRowCount(ResultSet set) throws SQLException
 	 * Добавление нового.
 	 */
 	public void info_FileAdd (Info_FileItem i, String fileName) {
-		PreparedStatement pst = null;
+		String stm;
+		PreparedStatement pst;
+		
+		int paramCount = 11;
+		String strInto = "";
+		String strValues = "";
 		
 		try {
-			String stm = "INSERT INTO info_file(id, title, file_body, file_name, icon_id, descr, text, " +
-		                 "                       isShowTitle, isshowdescr, isshowtext) " + 
-       			         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			if (i.getDateCreated() != null) {
+				strInto   += ", date_created";
+				strValues += ", ?";
+			}
+			if (i.getDateModified() != null) {
+				strInto   += ", date_modified";
+				strValues += ", ?";
+			}
+			if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+				strInto   += ", user_created";
+				strValues += ", ?";
+			}
+			if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				strInto   += ", user_modified";
+				strValues += ", ?";
+			}			
+			
+			stm = "INSERT INTO info_file(id, title, file_body, file_name, icon_id, descr, text, " +
+		                 "                       isShowTitle, isshowdescr, isshowtext"+ strInto +") " + 
+       			         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?"+ strValues +")";
             pst = con.prepareStatement(stm);
             pst.setLong  (1, i.getId());
             pst.setString(2, i.getTitle());
             
-            File file = new File(fileName);
-            FileInputStream fis = new FileInputStream(file);
-            pst.setBinaryStream(3, fis, (int)file.length());
+            if (fileName != null) {
+            	File file = new File(fileName);
+            	FileInputStream fis = new FileInputStream(file);
+            	pst.setBinaryStream(3, fis, (int)file.length());
+            } else {
+            	pst.setBytes(3, i.getFileBody());
+            }
             
             pst.setString(4, i.getName());     // fileName
             pst.setLong  (5, i.getIconId());
@@ -1329,11 +1354,22 @@ public static int getRowCount(ResultSet set) throws SQLException
             pst.setInt   (9, i.getIsShowDescr());
             pst.setInt   (10,i.getIsShowText());
             
+            if (i.getDateCreated() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateCreated().getTime()));
+            }
+            if (i.getDateModified() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModified().getTime()));
+            }
+            if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+            	pst.setString(paramCount++, i.getUserCreated());
+			}
+            if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				pst.setString(paramCount++, i.getUserModified());
+			}
+            
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
-            //Logger lgr = Logger.getLogger(Prepared.class.getName());
-            //lgr.log(Level.SEVERE, ex.getMessage(), ex);
         	ex.printStackTrace();
         	ShowAppMsg.showAlert("WARNING", "db error", "Ошибка при работе с базой данных", 
 					             "Ошибка при добавлении нового блока (info_FileAdd).");
@@ -1344,6 +1380,7 @@ public static int getRowCount(ResultSet set) throws SQLException
 					 "Не найден файл " + fileName);
 		}
 	}
+	//TODO
 	
 	/**
 	 * Инфо блок "Файл". 
@@ -1466,12 +1503,34 @@ public static int getRowCount(ResultSet set) throws SQLException
 	 * Добавление нового.
 	 */
 	public void info_ImageAdd (Info_ImageItem i, String fileName) {
-		PreparedStatement pst = null;
+		String stm;
+		PreparedStatement pst;
+		
+		int paramCount = 11;
+		String strInto = "";
+		String strValues = "";
 		
 		try {
-			String stm = "INSERT INTO info_image(id, title, image, width, height, descr, text, " +
-		                 "                       isShowTitle, isshowdescr, isshowtext) " + 
-       			         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			if (i.getDateCreated() != null) {
+				strInto   += ", date_created";
+				strValues += ", ?";
+			}
+			if (i.getDateModified() != null) {
+				strInto   += ", date_modified";
+				strValues += ", ?";
+			}
+			if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+				strInto   += ", user_created";
+				strValues += ", ?";
+			}
+			if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				strInto   += ", user_modified";
+				strValues += ", ?";
+			}
+			
+			stm = "INSERT INTO info_image(id, title, image, width, height, descr, text, " +
+		                 "                       isShowTitle, isshowdescr, isshowtext" + strInto +") " + 
+       			         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?"+ strValues +")";
             pst = con.prepareStatement(stm);
             pst.setLong  (1, i.getId());
             pst.setString(2, i.getTitle());
@@ -1487,12 +1546,23 @@ public static int getRowCount(ResultSet set) throws SQLException
             pst.setInt   (8, i.getIsShowTitle());
             pst.setInt   (9, i.getIsShowDescr());
             pst.setInt   (10,i.getIsShowText());
+
+            if (i.getDateCreated() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateCreated().getTime()));
+            }
+            if (i.getDateModified() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModified().getTime()));
+            }
+            if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+            	pst.setString(paramCount++, i.getUserCreated());
+			}
+            if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				pst.setString(paramCount++, i.getUserModified());
+			}
             
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
-            //Logger lgr = Logger.getLogger(Prepared.class.getName());
-            //lgr.log(Level.SEVERE, ex.getMessage(), ex);
         	ex.printStackTrace();
         	ShowAppMsg.showAlert("WARNING", "db error", "Ошибка при работе с базой данных", 
 					             "Ошибка при добавлении нового блока (info_ImageAdd).");
@@ -1624,22 +1694,55 @@ public static int getRowCount(ResultSet set) throws SQLException
 	 * Добавление нового.
 	 */
 	public void info_TextAdd (Info_TextItem i) {
-		PreparedStatement pst = null;
+		String stm;
+		PreparedStatement pst;
+		
+		int paramCount = 5;
+		String strInto = "";
+		String strValues = "";
 		
 		try {
-            String stm = "INSERT INTO info_text (id, title, text, isShowTitle) " + 
-            			 "VALUES(?, ?, ?, ?)";
+			if (i.getDateCreated() != null) {
+				strInto   += ", date_created";
+				strValues += ", ?";
+			}
+			if (i.getDateModified() != null) {
+				strInto   += ", date_modified";
+				strValues += ", ?";
+			}
+			if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+				strInto   += ", user_created";
+				strValues += ", ?";
+			}
+			if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				strInto   += ", user_modified";
+				strValues += ", ?";
+			}
+			
+            stm = "INSERT INTO info_text (id, title, text, isShowTitle" + strInto +") " +  
+      			  "VALUES(?, ?, ?, ?"+ strValues +")";
             pst = con.prepareStatement(stm);
             pst.setLong  (1, i.getId());
             pst.setString(2, i.getTitle());
             pst.setString(3, i.getText());
             pst.setInt   (4, i.getIsShowTitle());
             
+            if (i.getDateCreated() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateCreated().getTime()));
+            }
+            if (i.getDateModified() != null) {
+            	pst.setTimestamp(paramCount++, new java.sql.Timestamp(i.getDateModified().getTime()));
+            }
+            if ((i.getUserCreated() != null) && (i.getUserCreated().length() > 0)) {
+            	pst.setString(paramCount++, i.getUserCreated());
+			}
+            if ((i.getUserModified() != null) && (i.getUserModified().length() > 0)) {
+				pst.setString(paramCount++, i.getUserModified());
+			}
+            
             pst.executeUpdate();
             pst.close();
         } catch (SQLException ex) {
-            //Logger lgr = Logger.getLogger(Prepared.class.getName());
-            //lgr.log(Level.SEVERE, ex.getMessage(), ex);
         	ex.printStackTrace();
         	ShowAppMsg.showAlert("WARNING", "db error", "Ошибка при работе с базой данных", 
 					             "Ошибка при добавлении нового блока (info_TextAdd).");

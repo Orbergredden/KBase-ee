@@ -679,7 +679,7 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     			//
     			InfoHeaderItem ihi;
     			
-    			for (int i=1; i<clip.getNumberOfInfoBlocks(); i++) {
+    			for (int i=1; i<=clip.getNumberOfInfoBlocks(); i++) {
     				ihi = InfoHeaderItem.unserialize(path, 
     						SectionClipboardInfo.FILE_PREFIX_INFO_HEADER+i+SectionClipboardInfo.FILE_POSTFIX);
     				ihi.setId(params.getConCur().db.infoNextId());
@@ -687,22 +687,43 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     				ihi.setTemplateStyleId(0);
     				//infoId ...
     				
+    				switch ((int)ihi.getInfoTypeId()) {
+    	    		case 1 :    // Простий текст
+    	    			Info_TextItem it = Info_TextItem.unserialize(path, 
+    	    					SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+i+SectionClipboardInfo.FILE_POSTFIX);
+    	    			it.setId(params.getConCur().db.info_TextNextId());
+    	    			ihi.setInfoId(it.getId());
+    	    			params.getConCur().db.info_TextAdd(it);
+    	    			break;
+    	    		case 2 :    // Зображення
+    	    			Info_ImageItem ii = Info_ImageItem.unserialize(path, 
+    	    					SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+i+SectionClipboardInfo.FILE_POSTFIX,
+    	        				SectionClipboardInfo.FILE_PREFIX_INFO_FILE +i+SectionClipboardInfo.FILE_POSTFIX);
+    	    			ii.setId(params.getConCur().db.info_ImageNextId());
+    	    			ihi.setInfoId(ii.getId());
+    	    			params.getConCur().db.info_ImageAdd(ii, 
+    	    					SectionClipboardInfo.FILE_PREFIX_INFO_FILE +i+SectionClipboardInfo.FILE_POSTFIX);
+    	    			break;
+    	    		case 3 :    // Файл
+    	    			Info_FileItem ifl = Info_FileItem.unserialize(path, 
+    	    					SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+i+SectionClipboardInfo.FILE_POSTFIX);
+    	    			ifl.setId(params.getConCur().db.info_TextNextId());
+    	    			ihi.setInfoId(ifl.getId());
+    	    			params.getConCur().db.info_FileAdd(ifl, null);
+    	    			break;
+    	    		default :
+    	    			ShowAppMsg.showAlert("WARNING", "Copy/Cut to local clipboard", 
+    	    					"Невідомий тип інфоблока", 
+    	   		                "Тип інфоблока "+ihi.getInfoTypeId()+" не визначений");
+    	    		}
     				
-    				///unser infoblock
-    				
-    				
-    				
-    				/// add to DB (2)
-    				
-    				
-    				
-    				
+    				params.getConCur().db.infoAdd(ihi);
     			}
     			
-    			
-    			
     			//---- додаємо в дерево-контрол
-    			
+    			TreeItem<SectionItem> subItemS = new TreeItem<>(sectionItem);
+    			selectedItem.getChildren().add(subItemS);
+    			selectedItem.setExpanded(true);
     			
     			
     			
@@ -723,8 +744,6 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     		
     		// выводим сообщение в статус бар
     		params.setMsgToStatusBar("Раздел '" + sectionItem.getName() + "' перемещен.");
-    		
-            //clipBoard_tiSection = null;    // ??? from old version
     		
     		break;
     	}
