@@ -139,17 +139,6 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
 	public SectionList_Controller.TreeView_Controller treeViewCtrl;
     
     /**
-     * Локальный буфер обмена. Элемент дерева-списка с обьектом иконки
-     */
-    private TreeItem<SectionItem> clipBoard_tiSection;
-    /**
-     * Локальный буфер обмена. Тип операции : 0 - копировать ; 1 - вырезать
-     */
-    private int clipBoard_typeOperation;
-    private static final int CLIPBOARD_TYPE_OPERATION__COPY = 0;
-    private static final int CLIPBOARD_TYPE_OPERATION__CUT  = 1;
-    
-    /**
      * Контроллер основного документа
      */
     DocumentView_Controller controller_DocView;
@@ -572,13 +561,8 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     	
     	saveToClipboard (SectionClipboardInfo.TYPE_OPER_COPY);
     	
-    	//// заносим данные в локальный буфер обмена
-    	//clipBoard_tiSection = selectedItem;
-        //clipBoard_typeOperation = CLIPBOARD_TYPE_OPERATION__COPY;
-        
         params.setMsgToStatusBar("Раздел '"+ selectedItem.getValue().getName() +"' скопирован в локальный буфер обмена.");
     }
-    //TODO
     
     /**
      * Вырезает текущий раздел с занесением в локальный буфер обмена
@@ -589,13 +573,8 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     	
     	saveToClipboard (SectionClipboardInfo.TYPE_OPER_CUT);
     	
-    	//// заносим данные в локальный буфер обмена
-    	//clipBoard_tiSection = selectedItem;
-        //clipBoard_typeOperation = CLIPBOARD_TYPE_OPERATION__CUT;
-        
         params.setMsgToStatusBar("Раздел '"+ selectedItem.getValue().getName() +"' вырезан в локальный буфер обмена.");
     }
-    //TODO
     
     /**
      * Вставляет раздел указанный в буфере обмена
@@ -702,12 +681,13 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     	    			ii.setId(params.getConCur().db.info_ImageNextId());
     	    			ihi.setInfoId(ii.getId());
     	    			params.getConCur().db.info_ImageAdd(ii, 
-    	    					SectionClipboardInfo.FILE_PREFIX_INFO_FILE +i+SectionClipboardInfo.FILE_POSTFIX);
+    	    					path+SectionClipboardInfo.FILE_PREFIX_INFO_FILE +i+SectionClipboardInfo.FILE_POSTFIX);
     	    			break;
     	    		case 3 :    // Файл
     	    			Info_FileItem ifl = Info_FileItem.unserialize(path, 
     	    					SectionClipboardInfo.FILE_PREFIX_INFO_BLOCK+i+SectionClipboardInfo.FILE_POSTFIX);
     	    			ifl.setId(params.getConCur().db.info_TextNextId());
+    	    			ifl.setIconId(0);;
     	    			ihi.setInfoId(ifl.getId());
     	    			params.getConCur().db.info_FileAdd(ifl, null);
     	    			break;
@@ -724,11 +704,6 @@ public class SectionList_Controller implements Container_Interface, AppItem_Inte
     			TreeItem<SectionItem> subItemS = new TreeItem<>(sectionItem);
     			selectedItem.getChildren().add(subItemS);
     			selectedItem.setExpanded(true);
-    			
-    			
-    			
-    			
-    			//TODO
     		}
     		break;
     	case SectionClipboardInfo.TYPE_OPER_CUT :
